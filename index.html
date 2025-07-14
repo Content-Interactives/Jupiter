@@ -315,6 +315,9 @@
     );
     camera.position.set(0, 4, 6);
 
+    // Remember default camera position for later reset
+    const defaultCamPos = camera.position.clone();
+
     const renderer = new THREE.WebGLRenderer({ antialias: performanceSettings.antialiasing });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 2 : 3));
@@ -578,8 +581,13 @@
 
       // Remove any special Jupiter overlays when not on info icon
       if (selectedKey !== 'fire') {
+        rotationPaused = false; // resume rotation when leaving info page
         removeGRSRing();
         removeVenusCloudLayer();
+        // Restore camera for normal view
+        camera.position.copy(defaultCamPos);
+        camera.lookAt(0,0,0);
+        controls.target.set(0,0,0);
       }
 
       // Remove calendar UI if not selecting calendar
@@ -646,6 +654,13 @@
         } else if (key === 'earth') {
           createEarth();
         } else if (key === 'fire') {
+          rotationPaused = true; // keep Jupiter static while highlighting
+          // Rotate Jupiter so the Great Red Spot (≈130°E) faces the camera
+          venus.rotation.set(0, -THREE.MathUtils.degToRad(40), 0);
+          // Move camera to eye-level, head-on view (slightly zoomed out)
+          camera.position.set(0, 0, 7);
+          camera.lookAt(0,0,0);
+          controls.target.set(0,0,0);
           createGRSRing();
         } else if (key === 'calendar') {
           createCalendarUI();
