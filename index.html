@@ -424,7 +424,39 @@
       return new THREE.Vector3(x, y, z);
     }
 
+    // -------------------------------------------------------------------------
+    // Great Red Spot ring highlight
+    // -------------------------------------------------------------------------
+    let grsRing = null;
 
+    function createGRSRing() {
+      if (grsRing) return; // already exists
+
+      const baseR = 2; // Jupiter mesh radius used in SphereGeometry
+      const inner = baseR * 0.28; // slimmer ring
+      const outer = baseR * 0.305;
+      const ringGeom = new THREE.RingGeometry(inner, outer, 64);
+      const ringMat  = new THREE.MeshBasicMaterial({ color: 0xff4500, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
+      grsRing = new THREE.Mesh(ringGeom, ringMat);
+
+      // Great Red Spot coordinates ≈ lat −22°, lon 90°E (tuned for this texture)
+      const localPos = latLonToVector3(-22, 130, baseR + 0.01);
+      grsRing.position.copy(localPos);
+
+      // Orient the ring so its normal follows outward radial direction
+      grsRing.lookAt(localPos.clone().multiplyScalar(2));
+
+      // Attach to Jupiter so it rotates with the planet
+      venus.add(grsRing);
+    }
+
+    function removeGRSRing() {
+      if (!grsRing) return;
+      venus.remove(grsRing);
+      grsRing.geometry.dispose();
+      grsRing.material.dispose();
+      grsRing = null;
+    }
 
     // -------------------------------------------------------------------------
     // Cloud layer for Venus (thick atmosphere visualization)
@@ -472,7 +504,7 @@
       // Shift Venus left first so positions are set before rendering
       venus.position.set(-2.5, 0, 0);
 
-      const earthGeom = new THREE.SphereGeometry(2, performanceSettings.sphereDetail, performanceSettings.sphereDetail);
+      const earthGeom = new THREE.SphereGeometry(0.18, performanceSettings.sphereDetail, performanceSettings.sphereDetail); // Earth radius ≈ 1/11 of Jupiter (scaled)
       const earthMat = new THREE.MeshStandardMaterial({ map: preloadedEarthTexture });
       earthMesh = new THREE.Mesh(earthGeom, earthMat);
       earthMesh.position.set(2.5, 0, 0);
@@ -544,8 +576,9 @@
         venus.position.set(0, 0, 0);
       }
 
-      // Remove cloud layer if not selecting fire/info
+      // Remove any special Jupiter overlays when not on info icon
       if (selectedKey !== 'fire') {
+        removeGRSRing();
         removeVenusCloudLayer();
       }
 
@@ -573,7 +606,7 @@
       controls.enabled = true;
 
       // Reset Flexi message
-      flexiBubbleElem.textContent = "Click an icon to learn more about Venus!";
+      flexiBubbleElem.textContent = "Click an icon to learn more about Jupiter!";
       factBoxElem.classList.remove('show');
     }
 
@@ -581,17 +614,17 @@
     // Facts and menu interactivity
     // -------------------------------------------------------------------------
     const facts = {
-      fire: "Venus is the hottest planet due to its thick sulfuric acid clouds that trap heat through a strong greenhouse effect.",
+      fire: "Great Red Spot: Jupiter’s gigantic, oval-shaped storm has raged for centuries and is large enough to engulf Earth.",
       rotation: "Retrograde rotation: Venus spins backwards compared with most planets. One Venus day lasts about 243 Earth days.",
       calendar: "Orbital period: Jupiter takes roughly 4,333 Earth days (about 11.86 Earth years) to orbit the Sun (a Jovian year).",
-      earth: "Size comparison: Venus radius ≈ 6,052 km, about 95% of Earth's radius, earning it the nickname 'Earth's twin'."
+      earth: "Size comparison: Jupiter's equatorial radius is ≈ 69,911 km — about 11 times Earth's — and its volume could fit over 1,300 Earths inside."
     };
 
     const factBoxElem = document.getElementById("factBox");
     const flexiBubbleElem = document.getElementById("flexiBubble");
 
     // Default message before any icon is clicked
-    flexiBubbleElem.textContent = "Click an icon to learn more about Venus!";
+    flexiBubbleElem.textContent = "Click an icon to learn more about Jupiter!";
     flexiBubbleElem.style.display = 'block';
 
     document.querySelectorAll('.menu-list i[data-key]').forEach((icon) => {
@@ -613,7 +646,7 @@
         } else if (key === 'earth') {
           createEarth();
         } else if (key === 'fire') {
-          createVenusCloudLayer();
+          createGRSRing();
         } else if (key === 'calendar') {
           createCalendarUI();
         }
@@ -706,7 +739,7 @@
 
       // Mini Earth
       miniEarth = new THREE.Mesh(
-        new THREE.SphereGeometry(0.11, Math.max(16, performanceSettings.sphereDetail / 2), Math.max(16, performanceSettings.sphereDetail / 2)),
+        new THREE.SphereGeometry(0.012, Math.max(16, performanceSettings.sphereDetail / 2), Math.max(16, performanceSettings.sphereDetail / 2)), // scaled mini Earth
         new THREE.MeshBasicMaterial({ map: earthTexMini })
       );
       orbitGroup.add(miniEarth);
