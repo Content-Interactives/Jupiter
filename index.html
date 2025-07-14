@@ -342,7 +342,7 @@
     // Venus sphere with texture
     // -------------------------------------------------------------------------
     const textureLoader = new THREE.TextureLoader();
-    const venusTexture = textureLoader.load("./2k_venus_surface.jpg");
+    const venusTexture = textureLoader.load("./8k_jupiter.jpg");
 
     // Preload Earth texture so Earth sphere can appear instantly when requested
     const preloadedEarthTexture = textureLoader.load("https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg");
@@ -406,7 +406,7 @@
     let orbitActive = false;
     let orbitDay = 0; // continuous simulated day counter
 
-    const VENUS_ORBIT_R = 1.6;  // enlarged orbits
+    const VENUS_ORBIT_R = 4.0;  // Jupiter's orbit radius (scaled)
     const EARTH_ORBIT_R = 2.6;
 
     // Raise Venus higher so it doesn't overlap lower UI elements
@@ -499,11 +499,11 @@
 
       calendarContainer.innerHTML = `
         <div class="calendar-text">Day of Earth Year</div>
-        <input type="range" min="0" max="365" value="0" class="calendar-slider" id="daySlider" />
+        <input type="range" min="0" max="4333" value="0" class="calendar-slider" id="daySlider" />
         <div class="calendar-labels">
           <span>0</span>
-          <span style="left: 60%">225</span>
-          <span style="right: 0">365</span>
+          <span style="left: 60%">2166</span>
+          <span style="right: 0">4333</span>
         </div>
       `;
 
@@ -583,7 +583,7 @@
     const facts = {
       fire: "Venus is the hottest planet due to its thick sulfuric acid clouds that trap heat through a strong greenhouse effect.",
       rotation: "Retrograde rotation: Venus spins backwards compared with most planets. One Venus day lasts about 243 Earth days.",
-      calendar: "Orbital period: Venus takes roughly 225 Earth days to orbit the Sun (a Venusian year).",
+      calendar: "Orbital period: Jupiter takes roughly 4,333 Earth days (about 11.86 Earth years) to orbit the Sun (a Jovian year).",
       earth: "Size comparison: Venus radius ≈ 6,052 km, about 95% of Earth's radius, earning it the nickname 'Earth's twin'."
     };
 
@@ -626,10 +626,10 @@
     function animate() {
       requestAnimationFrame(animate);
 
-      // Venus retrograde rotation (unless paused) - much slower than Earth
-      // Venus takes 243 Earth days to rotate, so it should be about 243x slower
+      // Jupiter prograde rotation (unless paused) – ~2.4× faster than Earth (≈10-hour day)
       if (!rotationPaused) {
-        venus.rotation.y -= 0.005 / 243;
+        // Earth baseline ≈0.005; Jupiter ≈2.4 × faster
+        venus.rotation.y += 0.005 * 2.4;
       }
 
       // Cloud layer rotation - slightly different speed to create atmospheric effect
@@ -691,15 +691,15 @@
         const mat = new THREE.LineBasicMaterial({ color: 0x888888 });
         return new THREE.Line(geom, mat);
       };
-      orbitGroup.add(makeRing(VENUS_ORBIT_R));
+      orbitGroup.add(makeRing(VENUS_ORBIT_R)); // Jupiter orbit ring
       orbitGroup.add(makeRing(EARTH_ORBIT_R));
 
-      const venusTexMini = textureLoader.load("./2k_venus_surface.jpg");
+      const venusTexMini = textureLoader.load("./8k_jupiter.jpg");
       const earthTexMini = textureLoader.load("https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg");
 
-      // Mini Venus
+      // Mini Jupiter
       miniVenus = new THREE.Mesh(
-        new THREE.SphereGeometry(0.09, Math.max(16, performanceSettings.sphereDetail / 2), Math.max(16, performanceSettings.sphereDetail / 2)),
+        new THREE.SphereGeometry(0.13, Math.max(16, performanceSettings.sphereDetail / 2), Math.max(16, performanceSettings.sphereDetail / 2)),
         new THREE.MeshStandardMaterial({ map: venusTexMini })
       );
       orbitGroup.add(miniVenus);
@@ -714,7 +714,7 @@
       // Labels
       const vDiv = document.createElement('div');
       vDiv.className = 'orbit-label';
-      vDiv.textContent = 'Venus';
+      vDiv.textContent = 'Jupiter';
       const vLabel = new CSS2DObject(vDiv);
       vLabel.position.set(0, 0.25, 0);
       miniVenus.add(vLabel);
@@ -760,7 +760,7 @@
 
       orbitDay += deltaDays;
 
-      const thetaV = ((orbitDay % 225) / 225) * Math.PI * 2; // wrap by period
+      const thetaV = ((orbitDay % 4333) / 4333) * Math.PI * 2; // Jupiter orbital period (~11.86 yrs)
       const thetaE = ((orbitDay % 365) / 365) * Math.PI * 2;
 
       miniVenus.position.set(Math.cos(thetaV) * VENUS_ORBIT_R, 0, Math.sin(thetaV) * VENUS_ORBIT_R);
@@ -770,7 +770,7 @@
     // Set orbit day directly (used by slider)
     function setOrbitDay(dayVal){
       orbitDay = dayVal;
-      const thetaV = ((orbitDay % 225) / 225) * Math.PI * 2;
+      const thetaV = ((orbitDay % 4333) / 4333) * Math.PI * 2;
       const thetaE = ((orbitDay % 365) / 365) * Math.PI * 2;
       if(miniVenus&&miniEarth){
         miniVenus.position.set(Math.cos(thetaV)*VENUS_ORBIT_R,0,Math.sin(thetaV)*VENUS_ORBIT_R);
