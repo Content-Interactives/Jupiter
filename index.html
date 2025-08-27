@@ -437,7 +437,7 @@
 
       const baseR = 2; // Jupiter mesh radius used in SphereGeometry
       const inner = baseR * 0.28; // slimmer ring
-      const outer = baseR * 0.305;
+      const outer = baseR * 0.295; // thinner ring
       const ringGeom = new THREE.RingGeometry(inner, outer, 64);
       const ringMat  = new THREE.MeshBasicMaterial({ color: 0xff4500, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
       grsRing = new THREE.Mesh(ringGeom, ringMat);
